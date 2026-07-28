@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="FreqForcing: Autoregressive Long Video Generation via Spectral Self-Anchoring">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>FreqForcing</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-1FWSVCGZTG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-1FWSVCGZTG');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./css/bulma.min.css">
+  <link rel="stylesheet" href="./css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./css/twentytwenty.css">
+  <link rel="stylesheet" href="./css/index.css">
+  <!-- <link rel="icon" href="./images/icon.png"> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+
+  <script src="./js/jquery-3.2.1.min.js"></script>
+  <script src="./js/jquery.event.move.js"></script>
+  <script src="./js/jquery.twentytwenty.js"></script>
+  <script src="./js/bulma-carousel.min.js"></script>
+  <script src="./js/bulma-slider.min.js"></script>
+  <script src="./js/fontawesome.all.min.js"></script>
+
+  <!--MathJax-->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<style>
+  .rolling-sink{
+    display: inline-block;
+    line-height: 1.3;
+    background: linear-gradient(
+      90deg,
+      #0095ff 0%,
+      #dd51cd 50%,
+      #0095ff 100%
+    );
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .rolling-sink-2{
+    display: inline-block;
+    /* line-height: 1.2; */
+    background: linear-gradient(
+      90deg,
+      #0095ff 0%,
+      #dd51cd 50%,
+      #0095ff 100%
+    );
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+</style>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <!-- <img src="./images/icon.png" style="width: 45px; margin-bottom: -8px;">&nbsp;&nbsp; -->
+          <h1 class="title is-1 publication-title" style="font-size: 2.8rem;">FreqForcing</h1>
+          <h1 class="title is-1 publication-title" style="font-size: 2.0rem; margin-top: -20px;">Autoregressive Long Video Generation via Spectral Self-Anchoring</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+                <a href="https://github.com/jiatongli2024" target="_blank">Jiatong Li</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="index.html" target="_blank">Leo Liang</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://www.cs.sjtu.edu.cn/~linghe.kong/" target="_blank">Linghe Kong</a><sup>1&dagger;</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://yulunzhang.com/" target="_blank">Yulun Zhang</a><sup>1&dagger;</sup>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>Shanghai Jiao Tong University</span>
+              &nbsp;
+              <span class="author-block"><sup>2</sup>Tencent HY Team</span>
+              <span class="eql-cntrb">
+                <small><br><sup>&dagger;</sup> Corresponding Authors</small>
+              </span>
+            <br>
+            <span class="author-block" style="margin-top: 5px;font-size:1.4rem">
+              <strong>arXiv 2026</strong>
+            </span>
+          </div>
+
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2602.07775" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="ai ai-arxiv" style="font-size:23px"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- Code Link. -->
+              <span class="link-block">
+                <a href="https://github.com/Rolling-Sink/Rolling-Sink" target="_blank" rel="noopener noreferrer"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-github" style="font-size:23px"></i>
+                  </span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- TODO: Add your supplementary material PDF or remove this section -->
+                    <span class="link-block">
+                      <a href="pdfs/supplementary_material.pdf" target="_blank"
+                      class="external-link button is-normal is-rounded is-dark">
+                      <span class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                      </span>
+                      <span>Supplementary</span>
+                    </a>
+                  </span>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rs-thumb {
+    border-radius: 5px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    height: auto;
+  }
+  .rs-thumb video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .rs-cap{
+    text-align: center;
+    font-size: 1.0rem;
+    margin-bottom: -10px;
+  }
+</style>
+
+<!-- <section class="section" id="Teaser_and_QC" style="margin-top: -80px;">
+  <div class="container is-max-desktop content is-centered has-text-centered">
+
+    <div class="columns is-variable is-2 is-centered">
+      <div class="column is-max-desktop is-12-tablet">
+        <div class="rs-thumb">
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="./videos/Ours_SnowBoard_YouTube.mp4" type="video/mp4">
+          </video>
+        </div>
+        <p class="rs-cap">
+          <strong class="rolling-sink-2">Rolling Sink</strong>
+          <strong>(Ours)</strong>
+          <br>
+          Training duration: <strong>5s</strong> (FPS=16, here and below)
+          <br>
+          Testing duration: <strong>5min</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="columns is-variable is-2 is-centered">
+      <div class="column is-one-third-desktop is-12-tablet">
+        <div class="rs-thumb">
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="./videos/SF_SnowBoard.mp4" type="video/mp4">
+          </video>
+        </div>
+        <p class="rs-cap">
+          <strong>Self Forcing</strong>
+          <br>
+          Training duration: <strong>5s</strong>
+          <br>
+          Testing duration: <strong>1min</strong>  
+        </p>
+      </div>
+
+      <div class="column is-one-third-desktop is-12-tablet">
+        <div class="rs-thumb">
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="./videos/LL_SnowBoard.mp4" type="video/mp4">
+          </video>
+        </div>
+        <p class="rs-cap">
+          <strong>LongLive (w/o LoRA)</strong>
+          <br>
+          Training duration: <strong>5s</strong>
+          <br>
+          Testing duration: <strong>1min</strong>        
+        </p>
+      </div>
+
+      <div class="column is-one-third-desktop is-12-tablet">
+        <div class="rs-thumb">
+          <video controls autoplay muted loop playsinline preload="metadata">
+            <source src="./videos/LL_LoRA_SnowBoard.mp4" type="video/mp4">
+          </video>
+        </div>
+        <p class="rs-cap">
+          <strong>LongLive (w/ LoRA)</strong>
+          <br>
+          Training duration: <strong>1min</strong>
+          <br>
+          Testing duration: <strong>2min</strong>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section> -->
+
+<section class="section hero is-light" id="Abstract" style="margin-top: -20px;">
+  <div class="container is-max-desktop content is-centered has-text-centered">
+    <h2 class="title is-3">Abstract</h2>
+    <div class="content has-text-justified">
+    <p> Autoregressive video diffusion models enable real-time streaming video generation. However, errors introduced during self-rollout accumulate over long horizons, manifesting as color drift, motion stagnation, and eventual visual collapse.
+    In this paper, we characterize this phenomenon from a frequency-domain perspective: error accumulation appears as a pronounced energy drift in the low-frequency bands. We further investigate the effectiveness of attention sink in the frequency domain, and find that it improves the video quality by alleviating the spectral energy drift to some extent, but cannot fully resolve it.
+    Motivated by the above analysis, we propose <strong>FreqForcing</strong>, a <strong>training-free</strong> framework that addresses error accumulation in long-video generation via Spectral Self-Anchoring (SSA). The proposed SSA leverages the low-frequency components of anchor attention to maintain long-horizon visual stability, while preserving dynamic motion through the high-frequency components of local attention. Our FreqForcing extends Self-Forcing pretrained on <em>5s</em> clips to two-minute generation, achieving $24\times$ extrapolation. Extensive experiments show that FreqForcing outperforms existing training-free methods quantitatively and qualitatively while remaining competitive with representative training-based approaches.
+    </p>
+
+    </div>
+  </div>
+</section>
+
+<section class="section hero" id="Method" style="margin-top: -20px;">
+  <div class="container is-max-desktop content is-centered has-text-centered">
+    <h2 class="title is-3">Methody</h2>
+    <div class="content has-text-justified">
+    <p>
+      <img src="./images/method.jpg">
+    </p>
+    <p>
+     <strong>Overview of FreqForcing.</strong> FreqForcing eliminates spectral energy drift during autoregressive video generation via Spectral Self-Anchoring (SSA). SSA consists of two steps. <strong>First</strong>, we design local-anchor attention branches. The local attention branch follows the standard sliding-window causal attention with attention sink to produce $A_{\mathrm{loc}}$, while the anchor attention branch uses high-quality sink frames to generate $A_{\mathrm{anc}}$. <strong>Second</strong>, we employ Spectral Anchoring to fuse the high-frequency components of $A_{\mathrm{loc}}$ with the low-frequency components of $A_{\mathrm{anc}}$, yielding the final fused output $A_{\mathrm{fused}}$.
+    </p>
+  </div>
+</section>
+
+<section class="hero is-light is-small comparison-section">
+  <div class="hero-body" style="padding: 0;">
+    
+    <div class="container full-width-container">
+      
+      <h2 class="title is-3 has-text-centered" style="margin-top: 2rem;">Object Identity Consistency Comparison</h2>
+      <p class="subtitle is-5 has-text-centered">
+        More consistent object identities throughout long-horizon generation.
+      </p>
+      <br>
+
+      <div class="comparison-grid header-row">
+        <div class="comparison-column method-name">Self-Forcing</div>
+        <div class="comparison-column method-name">LongLive</div>
+        <div class="comparison-column method-name">Rolling Forcing</div>
+        <div class="comparison-column method-name">Deep Forcing</div>
+        <div class="comparison-column method-name is-ours">FreqForcing (Ours)</div>
+      </div>
+
+      <!-- ==================== Group 1 ==================== -->
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video1/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video1/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video1/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video1/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video1/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A dynamic action shot in the style of a high-energy sports illustration, depicting a fencer in mid-sprint, blade raised, and feet barely touching the ground. The fencer, a young man with taut muscles and focused expression, swings his sword with precision and speed. His hair flows behind him, and his eyes lock onto his opponent. The background is a blurred arena, with spectators in the distance, creating a sense of urgency and excitement. The fencer's clothing is a sleek black fencing outfit, and his face is partially obscured by his mask. A close-up shot from a low angle, emphasizing the intensity of the moment.
+          </div>
+        </details>
+      </div>
+
+      <!-- ==================== Group 2 ==================== -->
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video2/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video2/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video2/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video2/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video2/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A 3D animation of a small, round, fluffy creature with big, expressive eyes exploring a vibrant, enchanted forest. The creature, a whimsical blend of a rabbit and a squirrel, has soft blue fur and a bushy, striped tail. It hops along a sparkling stream, its eyes wide with wonder. The forest is alive with magical elements: flowers that glow and change colors, trees with leaves in shades of purple and silver, and small floating lights that resemble fireflies. The creature stops to interact playfully with a group of tiny, fairy-like beings dancing around a mushroom ring. The creature looks up in awe at a large, glowing tree that seems to be the heart of the forest. The scene is rendered in a detailed, fantasy style, with a soft, ethereal lighting that enhances the enchantment. The camera follows the creature as it moves, capturing its playful interactions and the magical ambiance of the forest. A medium shot with a dynamic angle that highlights the creature's expressions and the enchanting environment.
+          </div>
+        </details>
+      </div>
+
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video3/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video3/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video3/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video3/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video3/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A charming comic-style illustration depicting a cozy living room scene where a fluffy gray cat is waking up its sleeping owner, who lies on the couch with a sleepy, resigned expression. The cat, with large, round eyes and a mischievous look, is pawing at the owner's face and meowing insistently. The owner attempts to ignore the cat, turning away slightly, but the cat persists, jumping onto the owner's chest and nuzzling their hand. Finally, the owner, unable to resist, reaches under the pillow and pulls out a small bag of treats, offering it to the cat with a playful smile. The background shows soft, warm lighting from a nearby lamp, with scattered books and a blanket on the couch. A medium shot from a slightly elevated angle, capturing both the cat and the owner's interaction.
+          </div>
+        </details>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small comparison-section">
+  <div class="hero-body" style="padding: 0;">
+    
+    <div class="container full-width-container">
+      
+      <h2 class="title is-3 has-text-centered" style="margin-top: 2rem;">More Comparisons on 120-second Videos </h2>
+      <br>
+
+      <div class="comparison-grid header-row">
+        <div class="comparison-column method-name">Self-Forcing</div>
+        <div class="comparison-column method-name">LongLive</div>
+        <div class="comparison-column method-name">Rolling Forcing</div>
+        <div class="comparison-column method-name">Deep Forcing</div>
+        <div class="comparison-column method-name is-ours">FreqForcing (Ours)</div>
+      </div>
+
+      <!-- ==================== Group 1 ==================== -->
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video4/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video4/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video4/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video4/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video4/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A cyberpunk-style illustration depicting a lone robot navigating a neon-lit cityscape. The robot stands tall with sleek, metallic armor, adorned with blinking lights and wires. Its eyes, glowing with a deep blue hue, scan the surroundings with curiosity. The background features towering skyscrapers, holographic advertisements, and crowded streets filled with various cyborgs and humans. The air is thick with smoke and the hum of technology. A medium shot from a high-angle perspective, capturing both the robot and the bustling city environment.
+          </div>
+        </details>
+      </div>
+
+      <!-- ==================== Group 2 ==================== -->
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video5/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video5/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video5/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video5/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video5/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A dynamic photograph capturing a little boy riding his bike through a garden that transitions through the changing seasons—fall leaves crunch underfoot, winter snow blankets the ground, spring flowers bloom, and summer sunshine sparkles through the foliage. The boy, with curly brown hair and a joyful smile, pedals energetically, his arms outstretched in excitement. The garden backdrop features trees with branches adorned in each season’s distinctive foliage. A series of shots taken from various angles, starting with a wide shot of the boy entering the garden in spring, transitioning to a mid-shot of him biking through the colorful autumn leaves, then a close-up of him riding through a snowy path, and finally a wide-angle view of him enjoying the warm summer sun. The photo has a natural, documentary style, emphasizing the boy’s natural movements and the vibrant colors of the changing seasons.
+          </div>
+        </details>
+      </div>
+
+      <div>
+        <!-- 视频网格 -->
+        <div class="comparison-grid">
+          <!-- Method A -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video6/Self-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method B -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video6/LongLive.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method C -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video6/Rolling-Forcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Method D (恢复) -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video6/DeepForcing.mp4" type="video/mp4">
+            </video>
+          </div>
+          <!-- Ours -->
+          <div class="comparison-column video-wrapper">
+            <video autoplay controls muted loop playsinline preload="metadata">
+              <source src="videos/video6/ours.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <!-- Prompt (放在下方，点击展开) -->
+        <details class="prompt-toggle">
+          <summary class="prompt-summary">Click to view Prompt</summary>
+          <div class="prompt-full-text">
+A vibrant and lively Chinese Lunar New Year celebration video featuring a majestic Chinese dragon performing traditional dance moves. The dragon, made of colorful silk and adorned with intricate patterns, has flowing scales and a fierce expression, moving gracefully with fluid movements. It dances amidst a sea of joyful people in festive red and gold attire, accompanied by drummers and musicians playing traditional instruments. The background showcases bustling streets filled with lanterns, paper decorations, and colorful stalls. The video has a dynamic and energetic feel, capturing the essence of the festival. A wide-angle shot with dynamic camera movements following the dragon's path.
+          </div>
+        </details>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small interactive-section">
+  <div class="hero-body" style="padding: 2rem 0;">
+    <div class="container full-width-container">
+      
+      <h2 class="title is-3 has-text-centered">More Videos Generated by FreqForcing</h2>
+      <br>
+
+      <div class="interactive-grid">
+        
+        <!-- Video 1 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/1.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A stylish woman strolls down a bustling Tokyo street, the warm glow of neon lights and animated city signs casting vibrant reflections. She wears a sleek black leather jacket paired with a flowing red dress and black boots, her black purse slung over her shoulder. Sunglasses perched on her nose and a bold red lipstick add to her confident, casual demeanor. The street is damp and reflective, creating a mirror-like effect that enhances the colorful lights and shadows. Pedestrians move about, adding to the lively atmosphere. The scene is captured in a dynamic medium shot with the woman walking slightly to one side, highlighting her graceful strides.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 2 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/2.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A vibrant and lively illustration in a cartoon style of a panda playing the guitar. The panda has black and white fur, with round eyes and a friendly expression. It sits comfortably on a small stool, strumming the guitar with one paw while the other rests on its knee. The guitar is a small acoustic model, and the strings are plucked with precision. The background features a cozy room with a few plants and colorful decorations, adding a warm and inviting atmosphere. The camera angle is slightly from above, capturing the panda's joyful and focused performance.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 3 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/3.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A vibrant anime illustration in a dynamic motion style of a pink pig running rapidly towards the camera in a narrow alley in Tokyo. The pig has large, round eyes and a playful expression, with its ears perked up and body slightly hunched forward. It is wearing a small, pink bow tie, adding a cute touch to its appearance. The background showcases the bustling Tokyo alley, with colorful signs and neon lights reflecting off the wet pavement. The scene is captured from a low-angle perspective, emphasizing the pig's energetic movement.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 4 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/4.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                An astronaut running through a narrow alley in Rio de Janeiro, Brazil. The astronaut is dressed in a bright white spacesuit with a helmet that reflects sunlight. The spacesuit is adorned with various technical patches and has a reflective texture. The astronaut's movements are energetic and dynamic, with one hand on their hip and the other reaching forward for balance. The background features colorful street art, vibrant buildings, and people bustling about. The alley is dimly lit, with shadows cast by the narrow walls. A mid-shot with the astronaut running from a low-angle perspective, capturing the excitement and contrast between the urban environment and the space exploration gear.
+              </div>
+            </div>
+          </details>
+        </div>
+
+      </div>
+
+
+      <div class="interactive-grid">
+        
+        <!-- Video 1 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/5.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A vibrant concert stage scene in the style of a music video, featuring a woman in the spotlight, singing passionately. She stands confidently on the stage, microphone in hand, with a captivating expression on her face. The bright light behind her creates a dramatic silhouette, casting a warm glow over her. She wears a stylish, form-fitting black dress with intricate silver embroidery, emphasizing her graceful movements. The background features a blurred stage with colorful lights and banners advertising the event. A dynamic medium shot capturing the singer from a slightly elevated angle, highlighting her performance and the dramatic lighting effects.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 2 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/6.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A traditional Chinese dining scene in a dimly lit restaurant, capturing a middle-aged Chinese man sitting at a small round table. He is attentively eating noodles with chopsticks, his face reflecting contentment and focus. His attire is casual yet neat, with a light blue shirt and black pants. The background features blurred details of other diners and tables, hinting at a bustling yet cozy atmosphere. The lighting casts soft shadows, enhancing the warm and inviting ambiance. A close-up shot from a slightly overhead angle, emphasizing the man's engaged expression and the textures of the food.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 3 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/7.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A dynamic FPV aerial view of a vibrant underwater suburban neighborhood, where colorful corals line the streets. The camera moves swiftly, capturing the intricate details of the coral formations and the diverse marine life swimming around. The streets are bustling with colorful fish and schools of tropical fish, creating a lively and energetic atmosphere. The water is crystal clear, with sunlight filtering through, casting a warm glow on the scene. The camera angle shifts slightly, providing a sense of depth and movement, as if the viewer is flying through this underwater world. A fast-paced, first-person view shot with a vivid and lifelike underwater setting.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Video 4 -->
+        <div class="interactive-card">
+          <video autoplay controls muted loop playsinline preload="metadata">
+            <source src="videos/freqforcing/8.mp4" type="video/mp4">
+          </video>
+          <details class="interactive-details">
+            <summary class="interactive-btn">Show Prompts</summary>
+            <div class="interactive-content">
+              <div class="prompt-block">
+                A photorealistic closeup video of two pirate ships battling each other as they sail inside a steaming cup of coffee. The ships are intricately detailed, with wooden planks, sails flapping in the breeze, and cannons aimed at each other. The crew members, wearing authentic pirate attire, brandish swords and pistols, their expressions fierce and determined. The coffee foam creates a frothy, turbulent sea, with ripples and waves realistically depicted. The background is a blurred, warm brown coffee surface, with steam rising gently. The camera angle is slightly elevated, capturing the intense action from above.
+              </div>
+            </div>
+          </details>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section hero" id="Experiments" style="margin-top: -20px;">
+  <div class="container is-max-desktop content is-centered has-text-centered">
+    <h2 class="title is-3">Experiments</h2>
+    <p>
+      <img src="./images/experiments.jpg">
+    </p>
+    <p>
+      <strong>Quantitative comparison on VBench-Long.</strong> All metrics are reported on <em>60s</em> and <em>120s</em> generations. The best results are highlighted in <strong>bold</strong>, and the second-best results are <u>underlined</u>.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre class="selectable"><code>
+</code></pre>
+  </div>
+</section>
+
+  <footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+
+          <p>
+            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
